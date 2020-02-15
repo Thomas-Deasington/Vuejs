@@ -15,10 +15,12 @@
             <div class="movies" v-for="(m, index) in movie_list" v-bind:key="m.titre" v-on:click="viewInfo(index)">
                 <div class="movie">
                     <img v-bind:src="m.image"><br>
-                    <p class="note">Note : {{ m.note }}/5</p>
+                    <p v-if="m.image==null">Pas d'image disponible</p>
+                    <p class="note" v-if="m.note != null">Note : {{ m.note }}/5</p>
                     <h3>{{ m.titre }} - {{ m.sortie }}</h3>
                     <span v-if="m.display">
                         <p>Langue du film : {{ m.langue }} </p>
+                        <p>Genre du film : {{ m.genre }} </p>
                         <h3><u>Réalisateur</u> : {{ m.realisateur }}</h3>
                         <p>Nationalité : {{ m.nationalite }}</p>
                         <p>Date de naissance : {{ m.birthDate }}</p>
@@ -40,6 +42,16 @@
                         </tr>
                         <tr>
                             <td>
+                                <label>Sélectionner un genre :</label>
+                            </td>
+                            <td>
+                                <select v-model="filterGenre">
+                                    <option v-for="g in genre" v-bind:key="g.nom">{{ g.nom }}</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
                                 <label>Année de sortie :</label>
                             </td>
                             <td>
@@ -51,7 +63,7 @@
                                 <label>Lien d'une image du film :</label>
                             </td>
                             <td>
-                                <input v-model="newSortie" placeholder="https://blabla.jpg">
+                                <input v-model="newImage" placeholder="https://blabla.jpg">
                             </td>
                         </tr>
                         <tr>
@@ -89,7 +101,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <button v-on:click="addMovie()">Ajouter le film à la liste</button>
+                <button v-on:click="addMovie()">Ajouter le film</button>
                 <p id="error"></p>
             </div>
         </div>
@@ -101,17 +113,45 @@ export default {
   name: 'movieItem',
   data() {
     return{
-       message: "Hello world !",
-        newSerieText: '',
-        newSerieTextChercher: '',
-        selected: 'Titre',
         display: true,
+        filterGenre:"Aucun",
         counter: 0,
+        genre: [{
+            nom: "Aucun"
+        },
+        {
+            nom: "Action"
+        },
+        {
+            nom: "Comédie"
+        },
+        {
+            nom: "Drame"
+        },
+        {
+            nom: "Historique"
+        },
+        {
+            nom: "Policier"
+        },
+        {
+            nom: "Science-fiction"
+        },
+        {
+            nom: "Horreur"
+        },
+        {
+            nom: "Documentaire"
+        },
+        {
+            nom: "Fantaisie"
+        }],
         movie_list: [{
             image: "https://fr.web.img6.acsta.net/pictures/19/10/22/10/17/3326733.jpg",
             note: 3,
             titre: "Star Wars, épisode IX : L'Ascension de Skywalker",
             sortie: 2019,
+            genre: "Science-fiction",
             realisateur: "J. J. Abrams",
             nationalite: "Américaine",
             langue: "Anglais",
@@ -123,6 +163,7 @@ export default {
             note: 4.5,
             titre: "Parasite",
             sortie: 2019,
+            genre: "Drame",
             realisateur: "Bong Joon-ho",
             nationalite: "Coréenne",
             langue: "Coréen",
@@ -134,6 +175,7 @@ export default {
             note: 5,
             titre: "Le Voyage de Chihiro",
             sortie: 2001,
+            genre: "Fantaisie",
             realisateur: "Hayao Miyazaki",
             nationalite: "Japonaise",
             langue: "Français",
@@ -145,6 +187,7 @@ export default {
             note: 4,
             titre: "Premier contact",
             sortie: 2016,
+            genre: "Drame",
             realisateur: "Denis Villeneuve",
             nationalite: "Canadienne",
             langue: "Français",
@@ -161,25 +204,30 @@ export default {
             this.counter++;
         },
         addMovie() {
-            if(this.newTitle == null || this.newSortie == null || this.newLangue == null || this.newName == null || this.newNationalite == null || this.newBirthDate == null){
+            if(this.newTitle == null || this.newSortie == null || this.newLangue == null || this.newName == null || this.newNationalite == null || this.newBirthDate == null || this.filterGenre == "Aucun"){
                 document.getElementById("error").textContent="Remplissez les champs";
             }
             else {
                 let annee = parseInt(this.newSortie);
                 if(Number.isInteger(annee)){
-                    let birthDate = this.newBirthDate.replace(/-/g,"/");
+                    let array = this.newBirthDate.split("-");
+                    let birthDate = array[2]+"/"+array[1]+"/"+array[0];
                     this.movie_list.push({
                     titre: this.newTitle,
                     sortie: this.newSortie,
+                    image: this.newImage,
                     langue: this.newLangue,
                     realisateur: this.newName,
                     nationalite: this.newNationalite,
                     birthDate: birthDate,
+                    genre: this.filterGenre,
                     display: false
                     });
+                    this.filterGenre="Aucun";
                     this.newLangue="";
                     this.newTitle="";
                     this.newSortie="";
+                    this.newImage="";
                     this.newName="";
                     this.newNationalite="";
                     this.newBirthDate="";
@@ -200,17 +248,9 @@ export default {
         },
         filter() {
             this.baseList = this.movie_list;
-            this.movie_list = this.movie_list.filter(m => m.titre == this.inputFilter);
-            
-
-            // if(this.filterChoice == "title") {
-            //     this.movie_list = this.movie_list.filter(m => m.titre == this.inputFilter);
-            // } else if(this.filterChoice == "sortie") {
-            //     this.movie_list = this.movie_list.filter(m => m.sortie == this.inputFilter);
-            // } else if(this.filterChoice == "real") {
-            //     this.movie_list = this.movie_list.filter(m => m.realisateur == this.inputFilter);
-            // }
+            this.movie_list = this.movie_list.filter(m => m.title == this.inputFilter);
             this.displayReset = true;
+            this.inputFilter="";
         },
         resetList() {
             this.movie_list = this.baseList;
@@ -246,7 +286,11 @@ a {
 input {
     background-color: white;
     border: 1px black solid;
-    margin-bottom: 10px;
+}
+
+select {
+    background-color: white;
+    border: 1px black solid;
 }
 
 button {

@@ -194,10 +194,13 @@ export default {
             birthDate: "03/10/1967",
             display: false
         }],
-        newMovie:"",
+        baseList:"",
         inputFilter:"",
         displayReset: false
     }
+    },
+    mounted () {
+        this.baseList = this.movie_list;
     },
     methods: {
         increment() {
@@ -247,8 +250,15 @@ export default {
             this.movie_list[index].display = !this.movie_list[index].display;
         },
         filter() {
-            this.baseList = this.movie_list;
-            this.movie_list = this.movie_list.filter(m => m.title == this.inputFilter);
+            this.movie_list = this.baseList;
+            // this.movie_list = this.movie_list.filter(m => m.titre.toLowerCase() == this.inputFilter);
+            const filterValue = this.inputFilter.toLowerCase();
+
+            const filter = movie => 
+                movie.titre.toLowerCase().includes(filterValue) ||
+                movie.realisateur.toLowerCase().includes(filterValue) ||
+                movie.sortie.toString().includes(filterValue);
+            this.movie_list = this.movie_list.filter(filter);
             this.displayReset = true;
             this.inputFilter="";
         },

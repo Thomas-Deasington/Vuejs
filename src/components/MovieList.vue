@@ -13,20 +13,7 @@
                 {{ movie_list.length }} film(s) dans la liste
             </p>
             <div class="movies" v-for="(m, index) in movie_list" v-bind:key="m.titre" v-on:click="viewInfo(index)">
-                <div class="movie">
-                    <img v-bind:src="m.image"><br>
-                    <p v-if="m.image==null">Pas d'image disponible</p>
-                    <p class="note" v-if="m.note != null">Note : {{ m.note }}/5</p>
-                    <h3>{{ m.titre }} - {{ m.sortie }}</h3>
-                    <span v-if="m.display">
-                        <p>Langue du film : {{ m.langue }} </p>
-                        <p>Genre du film : {{ m.genre }} </p>
-                        <h3><u>Réalisateur</u> : {{ m.realisateur }}</h3>
-                        <p>Nationalité : {{ m.nationalite }}</p>
-                        <p>Date de naissance : {{ m.birthDate }}</p>
-                        <a v-on:click="deleteMovie(index)">Supprimer</a>
-                    </span>
-                </div>
+                <MovieItem v-bind:movie="m" v-bind:id="index" v-on:delete="deleteMovie" />
             </div>
             <div id="form">
                 <table>
@@ -109,8 +96,13 @@
 </template>
 
 <script>
+import MovieItem from './MovieItem.vue';
+
 export default {
-  name: 'movieItem',
+  name: 'movieList',
+  components: {
+    MovieItem,
+  },
   data() {
     return{
         display: true,
@@ -246,14 +238,9 @@ export default {
         deleteMovie(index) {
             this.movie_list.splice(index, 1);
         },
-        viewInfo(index) {
-            this.movie_list[index].display = !this.movie_list[index].display;
-        },
         filter() {
             this.movie_list = this.baseList;
-            // this.movie_list = this.movie_list.filter(m => m.titre.toLowerCase() == this.inputFilter);
             const filterValue = this.inputFilter.toLowerCase();
-
             const filter = movie => 
                 movie.titre.toLowerCase().includes(filterValue) ||
                 movie.realisateur.toLowerCase().includes(filterValue) ||
@@ -269,6 +256,7 @@ export default {
     }
 }
 </script>
+
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>

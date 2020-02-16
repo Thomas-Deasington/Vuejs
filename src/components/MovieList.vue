@@ -13,99 +13,29 @@
                 {{ movie_list.length }} film(s) dans la liste
             </p>
             <div class="movies" v-for="(m, index) in movie_list" v-bind:key="m.titre" v-on:click="viewInfo(index)">
-                <MovieItem v-bind:movie="m" v-bind:id="index" v-on:delete="deleteMovie" />
+                <MovieItem v-bind:movie="m" v-bind:id="index" v-on:delete="deleteMovie(index)" />
             </div>
-            <div id="form">
-                <table>
-                    <tbody>
-                        <h3>Film</h3>
-                        <tr>
-                            <td>
-                                <label>Titre :</label>
-                            </td>
-                            <td>
-                                <input v-model="newTitle" placeholder="Nom du film">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label>Sélectionner un genre :</label>
-                            </td>
-                            <td>
-                                <select v-model="filterGenre">
-                                    <option v-for="g in genre" v-bind:key="g.nom">{{ g.nom }}</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label>Année de sortie :</label>
-                            </td>
-                            <td>
-                                <input v-model="newSortie" placeholder="2010">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label>Lien d'une image du film :</label>
-                            </td>
-                            <td>
-                                <input v-model="newImage" placeholder="https://blabla.jpg">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label>Langue :</label>
-                            </td>
-                            <td>
-                                <input v-model="newLangue" placeholder="Anglais, Français...">
-                            </td>
-                        </tr>
-                        <h3>Réalisateur</h3>
-                        <tr>
-                            <td>
-                                <label>Nom & prénom :</label>
-                            </td>
-                            <td>
-                                <input v-model="newName" placeholder="Nom Prénom">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label>Nationalité :</label>
-                            </td>
-                            <td>
-                                <input v-model="newNationalite" placeholder="Américaine, Anglaise...">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label>Date de naissance :</label>
-                            </td>
-                            <td>
-                                <input type="date" v-model="newBirthDate">
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <button v-on:click="addMovie()">Ajouter le film</button>
-                <p id="error"></p>
-            </div>
+            <a id="addMovie" v-on:click="addDisplay()" v-if="displayButton" href="#form">Ajouter un film</a>
+            <MovieAdd v-bind:genre="this.genre" v-on:add="addMovie" v-if="displayAdd"/>
         </div>
     </div>
 </template>
 
 <script>
 import MovieItem from './MovieItem.vue';
+import MovieAdd from './MovieAdd.vue';
 
 export default {
   name: 'movieList',
   components: {
     MovieItem,
+    MovieAdd
   },
   data() {
     return{
         display: true,
+        displayAdd: false,
+        displayButton: true,
         filterGenre:"Aucun",
         counter: 0,
         genre: [{
@@ -198,42 +128,24 @@ export default {
         increment() {
             this.counter++;
         },
-        addMovie() {
-            if(this.newTitle == null || this.newSortie == null || this.newLangue == null || this.newName == null || this.newNationalite == null || this.newBirthDate == null || this.filterGenre == "Aucun"){
-                document.getElementById("error").textContent="Remplissez les champs";
-            }
-            else {
-                let annee = parseInt(this.newSortie);
-                if(Number.isInteger(annee)){
-                    let array = this.newBirthDate.split("-");
-                    let birthDate = array[2]+"/"+array[1]+"/"+array[0];
-                    this.movie_list.push({
-                    titre: this.newTitle,
-                    sortie: this.newSortie,
-                    image: this.newImage,
-                    langue: this.newLangue,
-                    realisateur: this.newName,
-                    nationalite: this.newNationalite,
-                    birthDate: birthDate,
-                    genre: this.filterGenre,
-                    display: false
-                    });
-                    this.filterGenre="Aucun";
-                    this.newLangue="";
-                    this.newTitle="";
-                    this.newSortie="";
-                    this.newImage="";
-                    this.newName="";
-                    this.newNationalite="";
-                    this.newBirthDate="";
-                    document.getElementById("error").textContent=""
-                }
-                else {
-                    document.getElementById("error").textContent="L'année de sortie doit être une année"
-                }
-                
-            }
-            
+        addDisplay(){
+            this.displayAdd = !this.displayAdd;
+            this.displayButton = !this.displayButton;
+        },
+        addMovie(addBirthDate, addLangue, addTitre, addSortie, addImage, addRealisateur, addNationalite, addGenre) {
+            this.movie_list.push({
+                titre: addTitre,
+                sortie: addSortie,
+                image: addImage,
+                langue: addLangue,
+                realisateur: addRealisateur,
+                nationalite: addNationalite,
+                birthDate: addBirthDate,
+                genre: addGenre,
+                display: false
+            });
+            this.displayAdd = !this.displayAdd;
+            this.displayButton = !this.displayButton;
         },
         deleteMovie(index) {
             this.movie_list.splice(index, 1);
@@ -281,47 +193,34 @@ a {
   font-size: 150%;
 }
 
-input {
-    background-color: white;
-    border: 1px black solid;
-}
-
-select {
-    background-color: white;
-    border: 1px black solid;
-}
-
 button {
     background-color: lightgray;
     border: 1px solid black;
     margin-left: 1%; 
-
 }
 
-#form {
-    border: color 1px solid black;
-    margin-top: 20%;
+input {
     background-color: white;
+    border: 1px black solid;
+    border-radius: 5px;
 }
-
-table {
-    margin-left:auto; 
-    margin-right:auto;
-    margin-bottom: 5px;
+#addMovie{
+    display:inline-block;
+    padding:0.5em 3em;
+    border:0.16em solid #FFFFFF;
+    margin:0 0.3em 0.3em 0;
+    box-sizing: border-box;
+    text-decoration:none;
+    text-transform:uppercase;
+    font-family:'Roboto',sans-serif;
+    font-weight:400;
+    color:#FFFFFF;
+    text-align:center;
+    transition: all 0.15s;
 }
-
-#error {
-    font-size: 20px;
-    color: red;
-}
-
-img {
-    max-height: 30%;
-    max-width: 20%;
-}
-
-.note {
-    font-size: 140%;
+#addMovie:hover{
+    color:#000000;
+    border-color:#000000;
 }
 
 </style>

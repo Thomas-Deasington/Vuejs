@@ -44,4 +44,7 @@ img {
     max-height: 30%;
     max-width: 20%;
 }
+.note {
+    font-size: 140%;
+}
 </style>
